@@ -98,3 +98,17 @@ exports.updateAUser = async (req, res) => {
         res.status(500).json({ message: 'Erreur serveur.' });
     }
 };
+
+
+exports.listAllUsers = async (req,res) => {
+    
+        try {
+            const users = await User.find({});
+            res.status(200);
+            res.json(users);
+        } catch (error) {
+            res.status(500);
+            console.log(error);
+            res.json({message: "Erreur serveur."});
+        }
+    }

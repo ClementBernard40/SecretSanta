@@ -54,6 +54,12 @@ router
     .route("/login")
         .post(userController.userLogin)
 
+    
+    router 
+    .route("/allUsers")
+        .get(userController.listAllUsers)
+
+
 
 
 router 
