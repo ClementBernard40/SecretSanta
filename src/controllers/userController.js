@@ -44,8 +44,6 @@ exports.userLogin = async (req, res) => {
                 role: 'admin'
             };
             
-            console.log(process.env.JWT_KEY)
-
             const token = await jwt.sign(userData, process.env.JWT_KEY, { expiresIn: '10h' });
             res.status(200).json({ token });
         } else {
