@@ -64,7 +64,6 @@ exports.deleteAUser = async (req,res) => {
         res.json({message: "user supprimé"});
     } catch (error) {
         res.status(500);
-        console.log(error);
         res.json({message: "Erreur serveur."});
     }
 

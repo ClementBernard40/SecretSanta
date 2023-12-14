@@ -15,9 +15,6 @@ let userSchema = new Schema ({
         type: String,
         required: true
     },
-    role: {
-        type: Boolean
-    },
     created_at: {
         type: Date,
         default: Date.now
