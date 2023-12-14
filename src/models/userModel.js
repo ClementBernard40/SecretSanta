@@ -15,6 +15,10 @@ let userSchema = new Schema ({
         type: String,
         required: true
     },
+    user_group:  [{ 
+        type: mongoose.Types.ObjectId, 
+        ref: 'Group' 
+    }],
     created_at: {
         type: Date,
         default: Date.now

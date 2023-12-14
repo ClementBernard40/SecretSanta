@@ -52,10 +52,10 @@ app.get('/api-docs', swaggerUi.setup(swaggerSpec));
 
 
 
-//const timerRoute = require('./routes/timerRoute');
+const groupRoute = require('./routes/groupRoute');
 const userRoute = require('./routes/userRoute');
 
-//app.use('/', timerRoute);
+app.use('/group', groupRoute);
 app.use('/users', userRoute);
 
 
