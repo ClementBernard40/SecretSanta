@@ -7,13 +7,21 @@ let groupSchema = new Schema ({
         required: true,
     },
     id_leader: {
-        type: number,
+        type: String,
         required: true,
     },
-    id_:  {
-        type: String,
-        required: true
-    },
+    users_in_group:  [{ 
+        type: mongoose.Types.ObjectId, 
+        ref: 'User' 
+    }],
+    user_invited: [{ 
+        type: mongoose.Types.ObjectId, 
+        ref: 'User' 
+    }],
+    userTemp_invited: [{ 
+        type: mongoose.Types.ObjectId, 
+        ref: 'UserTemp' 
+    }],
     created_at: {
         type: Date,
         default: Date.now
