@@ -14,6 +14,14 @@ let groupSchema = new Schema ({
         type: mongoose.Types.ObjectId, 
         ref: 'User' 
     }],
+    user_invited: [{ 
+        type: mongoose.Types.ObjectId, 
+        ref: 'User' 
+    }],
+    userTemp_invited: [{ 
+        type: mongoose.Types.ObjectId, 
+        ref: 'UserTemp' 
+    }],
     created_at: {
         type: Date,
         default: Date.now

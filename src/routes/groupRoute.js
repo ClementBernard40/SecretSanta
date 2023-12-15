@@ -29,11 +29,11 @@ const jwtMiddleware = require('../middlewares/jwtMiddleware');
   
     router
         .route('/:id_group/invite')
-        .post(groupController.invite);
+        .post(jwtMiddleware.verifyToken,groupController.invite);
 
         router
-        .route('/:id_group/invite/accept')
-        .post(groupController.invite);
+        .route('/accept')
+        .post(jwtMiddleware.verifyTokenInvitation,groupController.accept);
     
   
 

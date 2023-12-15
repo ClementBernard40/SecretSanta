@@ -228,6 +228,14 @@ exports.invite = async (req, res) => {
                         }
 
                         // Création du token d'invitation
+                        const groupData = {
+                            user_invited: testuser._id
+                        };
+                        await Group.findByIdAndUpdate(
+                            req.params.id_group,
+                            { $set: groupData },
+                            { new: true } // Retourne le document modifié
+                        );
                         const tokenInvit = await jwt.sign(invitData, process.env.JWT_KEY, { expiresIn: '48h' });
                         res.status(200).json({ tokenInvit });
                     
@@ -237,7 +245,17 @@ exports.invite = async (req, res) => {
                     }else {
                         // L'utilisateur n'existe pas, vous pouvez continuer avec la création d'un nouvel utilisateur temporaire
                         let newUser = new UserTemp({ email: email, name: name_invited, password: password });
-                        const user = await newUser.save();
+                        const userTemp = await newUser.save();
+
+                        const groupData = {
+                            userTemp_invited: userTemp._id
+                        };
+                        await Group.findByIdAndUpdate(
+                            req.params.id_group,
+                            { $set: groupData },
+                            { new: true } // Retourne le document modifié
+                        );
+
                         const tokenInvit = await jwt.sign(invitData, process.env.JWT_KEY, { expiresIn: '48h' });
                         res.status(201).json({ message: "Utilisateur temporaire créé avec succès, voici son token d'invitation", tokenInvit });
                     }
@@ -257,7 +275,85 @@ exports.invite = async (req, res) => {
     }
 };
 
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZEdyb3VwIjoiNjU3YzE2OTk1OTc5ZjA3OTUyNTNlNGU1IiwiZW1haWwiOiJ0ZXN0QWNjZXB0YXRpb24uY29tIiwiaWF0IjoxNzAyNjQ4MDg1LCJleHAiOjE3MDI4MjA4ODV9.3s2wY0xwlZSYOPvGXM3DJ-QEA_3akPhcm_ft7kgZx_g
+exports.accept = async (req, res) => {
+    const token = req.headers['invitation'];
+    let payload = jwtMiddleware.decode(token);
 
-exports.accpet = async (req, res) => {
+    const group_id = payload.idGroup
+    const emailUser = payload.email
+    console.log(payload)
+    console.log(group_id)
+    console.log(emailUser)
+
+    const group = await Group.findById(group_id);
+    let is_temp = 2;
+    const group_userTemp = group.userTemp_invited
+
+
+
+    let usertemp = await UserTemp.findOne({ email: emailUser });
+
+    if (!usertemp) {
+        usertemp = await User.findOne({ email: emailUser });
+
+    }
+    let is_accepted = req.body.is_accepted
+
+    console.log(usertemp)
+        // si dans c'est un usertemp
+        if (group_userTemp.includes(usertemp._id)) {
+             is_temp = 1;
+        } else {
+             is_temp = 0
+        }
+
+    //si il a refusé :
     
+    if (is_accepted == 0) {
+        if (is_temp == 1) {
+            await Group.updateOne(
+                { _id: group_id },
+                { $pull: { userTemp_invited: usertemp._id } })
+                await UserTemp.deleteOne({ email: emailUser });
+                res.status(200).json({ message: "invitation refusé" });
+
+        } else {
+            await Group.updateOne(
+                { _id: group_id },
+                { $pull: { user_invited: usertemp._id } })
+                res.status(200).json({ message: "invitation refusé" });
+        }
+        
+    } else if (is_accepted == 1) {     //si il a accepté : 
+        if (is_temp == 1) {
+            let newUser = new User({ email: usertemp.email, name: usertemp.name, password: user.password });
+
+            await Group.updateOne(
+                { _id: group_id },
+                { $pull: { userTemp_invited: usertemp._id } })
+            await Group.updateOne(
+                { _id: group_id },
+                { $push: { users_in_group: newUser._id } })
+            await UserTemp.deleteOne({ email: emailUser });
+            res.status(200).json({ message: "invitation accepté" });
+
+        } else {
+            await Group.updateOne(
+                { _id: group_id },
+                { $pull: { user_invited: usertemp._id } })
+                await Group.updateOne(
+                    { _id: group_id },
+                    { $push: { users_in_group: usertemp._id } })
+                res.status(200).json({ message: "invitation accepté" });
+
+        }
+
+
+    } else {
+        res.status(400).json({ message: "enter 0 for decline and 1 for accept" });
+
+    }
+
+
 }
