@@ -41,3 +41,29 @@ exports.decode = function (jwt, options) {
     return payload;
 
 }
+
+exports.verifyTokenInvitation = async (req, res, next) => {
+    try {
+        const token = req.headers['invitation'];
+        if (token !== undefined) {
+            const payload = await new Promise((resolve, reject) => {
+                jwt.verify(token, jwtKey, (error, decoded) => {
+                    if (error) {
+                        reject(error)
+                    } else {
+                        resolve(decoded);
+                    }
+            });
+                     
+        });
+        req.user = payload;
+        next();
+
+        } else {
+            res.status(403).json({message: "Acces interdit: Token manquant"});
+        }
+    } catch {
+        res.status(403).json({message: "Acces interdit: token invalide"});
+    }
+    
+}

@@ -1,6 +1,9 @@
 require('dotenv').config;
 const Group = require('../models/groupModel');
 const User = require('../models/userModel');
+const UserTemp = require('../models/userTempModel');
+
+const generator = require('generate-password');
 
 const jwt = require('jsonwebtoken');
 const jwtMiddleware = require('../middlewares/jwtMiddleware');
@@ -31,9 +34,7 @@ exports.deleteAGroup = async (req,res) => {
     const token = req.headers['authorization'];
 
     let payload = jwtMiddleware.decode(token)
-    leader_id = payload.id
-    console.log(payload)
-    console.log(leader_id)
+    let leader_id = payload.id
 
     try {
         const group =  await Group.findById(req.params.id_group);
@@ -121,10 +122,142 @@ exports.getUserGroup = async (req, res) => {
 // Fonction pour obtenir un groupe par ID
 async function getAGroupById(groupId) {
     try {
-        const group = await Group.findById(groupId);
-        return group;
+        if (!group) {
+            res.status(404).send("Group not found");
+        } else {
+            const group = await Group.findById(groupId);
+            return group;
+        }
     } catch (error) {
         console.log(error);
         return null; // ou gérer l'erreur de manière appropriée
     }
+}
+
+
+
+exports.groupInfo = async (req, res) => {
+    const token = req.headers['authorization'];
+
+    let payload = jwtMiddleware.decode(token);
+    let user_id = payload.id;
+
+    try {
+        const groupId = req.params.id_group;
+        const group = await Group.findById(groupId);
+
+        if (!group) {
+            res.status(404).json({ message: "Group not found" });
+            return;
+        }
+
+        const group_user = group.users_in_group;
+
+        for (const userid of group_user) {
+            if (user_id == userid) {
+                res.status(200).json(group);
+                return; // Ajoutez le return ici pour éviter de poursuivre la boucle inutilement
+            }
+        }
+
+        // Si l'utilisateur n'est pas dans le groupe
+        res.status(403).json({ message: "you are not in this group" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+
+exports.invite = async (req, res) => {
+    const token = req.headers['authorization'];
+    let payload = jwtMiddleware.decode(token);
+
+    if (!payload) {
+        res.status(403).json({ message: "Token invalide" });
+        return;
+    }
+
+    let user_id = payload.id;
+    let email = req.body.email;
+
+    const invitData = {
+        idGroup: req.params.id_group,
+        email: email
+    };
+
+    try {
+        const groupId = req.params.id_group;
+        const group = await Group.findById(groupId);
+
+        if (!group) {
+            res.status(404).json({ message: "Groupe non trouvé" });
+            return;
+        }
+
+        const group_user = group.users_in_group;
+        const name_invited = req.body.name;
+
+        for (const userid of group_user) {
+            if (user_id == userid) {
+                if (!name_invited) {
+                    res.status(400).json({ message: "Nom introuvable" });
+                    return;
+                }
+
+                var password = generator.generate({
+                    length: 10,
+                    numbers: true
+                });
+
+                try {
+                    // Recherche de l'utilisateur dans la base de données
+                    const testuser = await User.findOne({ email: email });
+                    const testuserTemp = await UserTemp.findOne({ email: email });
+
+                    // test si l'utilisateur existe déjà dans la base de données
+                    if (testuser) {
+
+                        const testuser_id = testuser._id;
+
+                        // Vérification si l'utilisateur est déjà dans le groupe
+                        if (group_user.includes(testuser_id)) {
+                            res.status(200).json({ message: "L'utilisateur est déjà dans ce groupe" });
+                            return;
+                        }
+
+                        // Création du token d'invitation
+                        const tokenInvit = await jwt.sign(invitData, process.env.JWT_KEY, { expiresIn: '48h' });
+                        res.status(200).json({ tokenInvit });
+                    
+                    //test si user deja invité
+                    } else if (testuserTemp) {
+                        res.status(403).json({ message: "L'utilisateur a deja été invité" });
+                    }else {
+                        // L'utilisateur n'existe pas, vous pouvez continuer avec la création d'un nouvel utilisateur temporaire
+                        let newUser = new UserTemp({ email: email, name: name_invited, password: password });
+                        const user = await newUser.save();
+                        const tokenInvit = await jwt.sign(invitData, process.env.JWT_KEY, { expiresIn: '48h' });
+                        res.status(201).json({ message: "Utilisateur temporaire créé avec succès, voici son token d'invitation", tokenInvit });
+                    }
+                } catch (error) {
+                    console.log(error);
+                    res.status(500).json({ message: "Erreur serveur (db)" });
+                }
+                return; // Ajoutez le return ici pour éviter de poursuivre la boucle inutilement
+            }
+        }
+
+        // Si l'utilisateur n'est pas dans le groupe
+        res.status(403).json({ message: "Vous n'êtes pas dans ce groupe" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Erreur serveur interne" });
+    }
+};
+
+
+exports.accpet = async (req, res) => {
+    
 }
