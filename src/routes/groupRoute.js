@@ -6,14 +6,22 @@ const jwtMiddleware = require('../middlewares/jwtMiddleware');
 
 
 
-router
+    router
     .route('/create')
         .post(jwtMiddleware.verifyToken,groupController.createAgroup);
 
     router
       .route('/:id_group')
-        .delete(jwtMiddleware.verifyToken,groupController.deleteAGroup);
+        .delete(jwtMiddleware.verifyToken,groupController.deleteAGroup)
+        .put(jwtMiddleware.verifyToken,groupController.updateAGroup);
 
+    router
+        .route('/getAllGroup')
+        .get(groupController.getAllGroup);
+
+    router
+      .route('/getUserGroup')
+        .get(jwtMiddleware.verifyToken,groupController.getUserGroup);
 
 
 
