@@ -12,7 +12,13 @@ const jwtMiddleware = require('../middlewares/jwtMiddleware');
   
     router
       .route('/santa/assignments/:id_group')
-        .get(jwtMiddleware.verifyToken, santaController.getUserAssignment);
+        .get(jwtMiddleware.verifyToken, santaController.getUserAssignment)
+
+    router
+      .route('/santa/allAssignments/:id_group')
+        .get(jwtMiddleware.verifyToken, santaController.getAllAssignments);
+
+
 
 
 module.exports = router;

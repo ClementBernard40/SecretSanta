@@ -95,10 +95,43 @@ exports.getUserAssignment = async (req, res) => {
 
 
         const receiver = await User.findById(receiver_id);
+        if (!receiver) {
+            return res.status(500).json({ message: "Erreur lors de la récupération de l'utilisateur destinataire." });
+        }
         console.log(receiver)
 
         const receiver_name = receiver.name
         res.status(200).json({ receiver_name });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Une erreur s'est produite lors du traitement" });
+    }
+};
+
+exports.getAllAssignments = async (req, res) => {
+    try {
+        const token = req.headers['authorization'];
+        let payload = jwtMiddleware.decode(token);
+        let admin_id = payload.id;
+
+        const group = await Group.findById(req.params.id_group);
+
+        // Vérifier si l'utilisateur est un administrateur (leader)
+        if (admin_id !== group.id_leader) {
+            return res.status(403).json({ message: "Vous n'avez pas les autorisations nécessaires pour effectuer cette action." });
+        }
+
+        // Récupérer tous les tirages au sort pour le groupe spécifié
+        const assignments = await Santa.find({ group_id: req.params.id_group })
+            .populate('sender', 'name')
+            .populate('receiver', 'name');
+
+        const assignmentList = assignments.map(assignment => ({
+            sender: assignment.sender.name,
+            receiver: assignment.receiver.name
+        }));
+
+        res.status(200).json({ assignments: assignmentList });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Une erreur s'est produite lors du traitement" });

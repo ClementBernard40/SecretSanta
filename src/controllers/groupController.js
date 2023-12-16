@@ -2,11 +2,12 @@ require('dotenv').config;
 const Group = require('../models/groupModel');
 const User = require('../models/userModel');
 const UserTemp = require('../models/userTempModel');
-
+const Santa = require('../models/santaModel');
+const bcrypt = require('bcrypt');
 const generator = require('generate-password');
-
 const jwt = require('jsonwebtoken');
 const jwtMiddleware = require('../middlewares/jwtMiddleware');
+const saltRounds = 10;
 
 
 exports.createAgroup = async (req, res) => {
@@ -179,6 +180,7 @@ exports.invite = async (req, res) => {
         return;
     }
 
+
     let user_id = payload.id;
     let email = req.body.email;
 
@@ -196,6 +198,16 @@ exports.invite = async (req, res) => {
             return;
         }
 
+        const santaTest = await Santa.findOne({ group_id: groupId });
+        console.log(santaTest)
+
+        if (santaTest) {
+            if (santaTest.group_id == groupId) {
+                res.status(403).json({ message: "le tirage a deja été effectué, impossible d'ajouter une nouvelle personne au groupe" });
+    
+            }
+        }
+        
         const group_user = group.users_in_group;
         const name_invited = req.body.name;
 
@@ -276,83 +288,91 @@ exports.invite = async (req, res) => {
 };
 
 exports.accept = async (req, res) => {
-    const token = req.headers['invitation'];
-    let payload = jwtMiddleware.decode(token);
+    try {
+        const token = req.headers['invitation'];
+        const payload = jwtMiddleware.decode(token);
+        const group_id = payload.idGroup;
+        const emailUser = payload.email;
 
-    const group_id = payload.idGroup
-    const emailUser = payload.email
-    console.log(payload)
-    console.log(group_id)
-    console.log(emailUser)
+        const group = await Group.findById(group_id);
+        let is_temp = 2;
+        const group_userTemp = group.userTemp_invited;
 
-    const group = await Group.findById(group_id);
-    let is_temp = 2;
-    const group_userTemp = group.userTemp_invited
+        let usertemp = await UserTemp.findOne({ email: emailUser });
 
+        if (!usertemp) {
+            usertemp = await User.findOne({ email: emailUser });
+        }
 
+        let is_accepted = req.body.is_accepted;
 
-    let usertemp = await UserTemp.findOne({ email: emailUser });
-
-    if (!usertemp) {
-        usertemp = await User.findOne({ email: emailUser });
-
-    }
-    let is_accepted = req.body.is_accepted
-
-    console.log(usertemp)
-        // si dans c'est un usertemp
+        // Vérifier si c'est un usertemp
         if (group_userTemp.includes(usertemp._id)) {
-             is_temp = 1;
+            is_temp = 1;
         } else {
-             is_temp = 0
+            is_temp = 0;
         }
 
-    //si il a refusé :
-    
-    if (is_accepted == 0) {
-        if (is_temp == 1) {
-            await Group.updateOne(
-                { _id: group_id },
-                { $pull: { userTemp_invited: usertemp._id } })
-                await UserTemp.deleteOne({ email: emailUser });
-                res.status(200).json({ message: "invitation refusé" });
-
-        } else {
-            await Group.updateOne(
-                { _id: group_id },
-                { $pull: { user_invited: usertemp._id } })
-                res.status(200).json({ message: "invitation refusé" });
-        }
-        
-    } else if (is_accepted == 1) {     //si il a accepté : 
-        if (is_temp == 1) {
-            let newUser = new User({ email: usertemp.email, name: usertemp.name, password: usertemp.password });
-
-            await Group.updateOne(
-                { _id: group_id },
-                { $pull: { userTemp_invited: usertemp._id } })
-            await Group.updateOne(
-                { _id: group_id },
-                { $push: { users_in_group: newUser._id } })
-            await UserTemp.deleteOne({ email: emailUser });
-            res.status(200).json({ message: "invitation accepté" });
-
-        } else {
-            await Group.updateOne(
-                { _id: group_id },
-                { $pull: { user_invited: usertemp._id } })
+        // Si l'invitation est refusée
+        if (is_accepted == 0) {
+            // Si usertemp
+            if (is_temp == 1) {
                 await Group.updateOne(
                     { _id: group_id },
-                    { $push: { users_in_group: usertemp._id } })
-                res.status(200).json({ message: "invitation accepté" });
+                    { $pull: { userTemp_invited: usertemp._id } }
+                );
+                await UserTemp.deleteOne({ email: emailUser });
+                res.status(200).json({ message: "Invitation refusée" });
+            } else {
+                // Si user
+                await Group.updateOne(
+                    { _id: group_id },
+                    { $pull: { user_invited: usertemp._id } }
+                );
+                res.status(200).json({ message: "Invitation refusée" });
+            }
+        } else if (is_accepted == 1) { // Si l'invitation est acceptée
+            // Si usertemp
+            if (is_temp == 1) {
+                // Génération d'un nouveau mot de passe pour l'utilisateur permanent
+                let passwordToHash = usertemp.password
+                let salt = await bcrypt.genSalt(saltRounds);
+                let hash = await bcrypt.hash(passwordToHash, salt);
 
+                let newUser = new User({ email: usertemp.email, name: usertemp.name, password: usertemp.password });
+
+                newUser.tempPassword = usertemp.password;
+                newUser.password = hash;
+
+                await Group.updateOne(
+                    { _id: group_id },
+                    { $pull: { userTemp_invited: usertemp._id } }
+                );
+                await Group.updateOne(
+                    { _id: group_id },
+                    { $push: { users_in_group: newUser._id } }
+                );
+                await UserTemp.deleteOne({ email: emailUser });
+                await newUser.save();
+                res.status(200).json({ message: "Invitation acceptée" });
+            } else {
+                // Si user
+                await Group.updateOne(
+                    { _id: group_id },
+                    { $pull: { user_invited: usertemp._id } }
+                );
+                await Group.updateOne(
+                    { _id: group_id },
+                    { $push: { users_in_group: usertemp._id } }
+                );
+                res.status(200).json({ message: "Invitation acceptée" });
+            }
+        } else {
+            res.status(400).json({ message: "Entrez 0 pour refuser et 1 pour accepter" });
         }
-
-
-    } else {
-        res.status(400).json({ message: "enter 0 for decline and 1 for accept" });
-
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Erreur serveur interne" });
     }
+};
 
-
-}
