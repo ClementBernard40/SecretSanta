@@ -15,6 +15,9 @@ let userSchema = new Schema ({
         type: String,
         required: true
     },
+    tempPassword:  {
+        type: String,
+    },
     user_group:  [{ 
         type: mongoose.Types.ObjectId, 
         ref: 'Group' 
