@@ -275,7 +275,6 @@ exports.invite = async (req, res) => {
     }
 };
 
-//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZEdyb3VwIjoiNjU3YzE2OTk1OTc5ZjA3OTUyNTNlNGU1IiwiZW1haWwiOiJ0ZXN0QWNjZXB0YXRpb24uY29tIiwiaWF0IjoxNzAyNjQ4MDg1LCJleHAiOjE3MDI4MjA4ODV9.3s2wY0xwlZSYOPvGXM3DJ-QEA_3akPhcm_ft7kgZx_g
 exports.accept = async (req, res) => {
     const token = req.headers['invitation'];
     let payload = jwtMiddleware.decode(token);
@@ -327,7 +326,7 @@ exports.accept = async (req, res) => {
         
     } else if (is_accepted == 1) {     //si il a accepté : 
         if (is_temp == 1) {
-            let newUser = new User({ email: usertemp.email, name: usertemp.name, password: user.password });
+            let newUser = new User({ email: usertemp.email, name: usertemp.name, password: usertemp.password });
 
             await Group.updateOne(
                 { _id: group_id },

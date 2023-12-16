@@ -3,14 +3,14 @@ const Schema = mongoose.Schema;
 
 let santaSchema = new Schema (
     {
-        sender: [{ 
+        sender: { 
             type: Schema.Types.ObjectId,
             ref: 'User' 
-        }],
-        receiver: [{ 
+        },
+        receiver: { 
             type: Schema.Types.ObjectId,
             ref: 'User' 
-        }],
+        },
         group_id: {
             type: String,
             required: true
