@@ -49,6 +49,7 @@ This is a REST API application made with Express that facilitates Secret Santa b
 
 You can access it at import in postman "Secret Santa.postman_collection.json" in the "doc" folder.
 
+I tried to do it with swagger but not being successful I exported the Postman collection to you
 
 ## Routes
 
