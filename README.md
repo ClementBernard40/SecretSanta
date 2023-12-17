@@ -42,6 +42,7 @@ This is a REST API application made with Express that facilitates Secret Santa b
 
     ```bash
     npm start
+    ```
 
 
     The server will run at http://localhost:3000.
@@ -55,20 +56,39 @@ You can access it at import in postman "Secret Santa.postman_collection.json" in
 ## Routes
 
 * **/group**: Group-related routes
-    * **/group/create** : 
-       * *POST* : Create a group
-    * **/group//:id_group**
+    * **/group/create** 
+       * *POST* : Create a group (name)
+    * **/group/:id_group**
        * *DELETE* : Delete a group (only leader of the group)(have to be logged)
        * *PUT* : Update a group (only leader of the group)(have to be logged)
-    * **/group/getAllGroup** : 
+    * **/group/getAllGroup** 
        * *GET* : Get a list of all the groups
-    * **/group/getUserGroup** : 
-       * *GET* : get a list of the user\'s groups
-    * **/group/create** : create a group /:id_group
-    * **/group/create** : create a group /:id_group
-    * **/group/create** : create a group /:id_group
+    * **/group/getUserGroup** 
+       * *GET* : Get a list of the user\'s groups (have to be logged)
+    * **/group/:id_group/info** 
+       * *GET* : Get informations about a group (only leader of the group)(have to be logged)
+    * **/group/:id_group/invite** 
+        * *POST* : Invite people in the group (email,name)(have to be logged)
+    * **/group/accept** 
+        * *POST* : Accept of decline an invitation (0 to decline, 1 to accept)(need invitation)
 * **/users**: User-related routes
+    * **/user/register**
+        * *POST* : Create a user (email, name, password)
+    * **/user/login**
+        * *POST* : Log a user (email, mail, password)
+    * **/user/allUsers**
+        * *GET* : Get the list of all users in the database
+    * **/user/:id_users**
+        * *DELETE* : Delete a user (have to be logged)
+        * *UPDATE* : Update a user (have to be logged)
 * **/**: Secret Santa-related routes
+    * **/santa/:id_group**
+        * *POST* : launch the draw for secret santa members (only leader of the group)(have to be logged)
+    * **/santa/assignments/:id_group**
+        * *GET* : see who a user owes a gift to (have to be logged)
+    * **/santa/allAssignments/:id_group**
+        * *GET* : get the list ao all the assignments (leader group only)(have to be logged)
+
 
 
 ## Dependencies

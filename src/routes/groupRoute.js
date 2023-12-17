@@ -24,7 +24,7 @@ const jwtMiddleware = require('../middlewares/jwtMiddleware');
         .get(jwtMiddleware.verifyToken,groupController.getUserGroup);
 
         router
-        .route('/:id_group/info') //route to het informations about a group (only leader of the group)
+        .route('/:id_group/info') //route to get informations about a group (only leader of the group)
           .get(jwtMiddleware.verifyToken,groupController.groupInfo);
   
     router
