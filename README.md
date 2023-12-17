@@ -73,7 +73,7 @@ I tried to do it with swagger but not being successful I exported the Postman co
     * **/user/register**
         * *POST* : Create a user (email, name, password)
     * **/user/login**
-        * *POST* : Log a user (email, mail, password)
+        * *POST* : Log a user (email, password)
     * **/user/allUsers**
         * *GET* : Get the list of all users in the database
     * **/user/:id_users**
