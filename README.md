@@ -55,18 +55,18 @@ You can access it at import in postman "Secret Santa.postman_collection.json" in
 ## Routes
 
 * **/group**: Group-related routes
- * **/group/create** : 
-  * *POST* : Create a group
- * **/group//:id_group**
-  * *DELETE* : Delete a group (only leader of the group)(have to be logged)
-  * *PUT* : Update a group (only leader of the group)(have to be logged)
- * **/group/getAllGroup** : 
-  * *GET* : Get a list of all the groups
- * **/group/getUserGroup** : 
-  * *GET* : get a list of the user\'s groups
- * **/group/create** : create a group /:id_group
- * **/group/create** : create a group /:id_group
- * **/group/create** : create a group /:id_group
+    * **/group/create** : 
+       * *POST* : Create a group
+    * **/group//:id_group**
+       * *DELETE* : Delete a group (only leader of the group)(have to be logged)
+       * *PUT* : Update a group (only leader of the group)(have to be logged)
+    * **/group/getAllGroup** : 
+       * *GET* : Get a list of all the groups
+    * **/group/getUserGroup** : 
+       * *GET* : get a list of the user\'s groups
+    * **/group/create** : create a group /:id_group
+    * **/group/create** : create a group /:id_group
+    * **/group/create** : create a group /:id_group
 * **/users**: User-related routes
 * **/**: Secret Santa-related routes
 
