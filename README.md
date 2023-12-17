@@ -22,11 +22,17 @@ This is a REST API application made with Express that facilitates Secret Santa b
 
 1. Create a .env file in the root directory and add the following:
 
+    ```bash
     JWT_KEY='PutAnything'
+    ```
+
 
 2. conenct your database in the app.js
 
+    ```bash
     mongoose.connect("mongodb://127.0.0.1:27017/SecretSanta");
+    ```
+    
     Adjust the MongoDB URI as needed.
 
 
@@ -36,7 +42,7 @@ This is a REST API application made with Express that facilitates Secret Santa b
 
     ```bash
     npm start
-    ```
+
 
     The server will run at http://localhost:3000.
 
@@ -49,6 +55,18 @@ You can access it at import in postman "Secret Santa.postman_collection.json" in
 ## Routes
 
 * **/group**: Group-related routes
+ * **/group/create** : 
+  * *POST* : Create a group
+ * **/group//:id_group**
+  * *DELETE* : Delete a group (only leader of the group)(have to be logged)
+  * *PUT* : Update a group (only leader of the group)(have to be logged)
+ * **/group/getAllGroup** : 
+  * *GET* : Get a list of all the groups
+ * **/group/getUserGroup** : 
+  * *GET* : get a list of the user\'s groups
+ * **/group/create** : create a group /:id_group
+ * **/group/create** : create a group /:id_group
+ * **/group/create** : create a group /:id_group
 * **/users**: User-related routes
 * **/**: Secret Santa-related routes
 
