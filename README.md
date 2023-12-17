@@ -8,8 +8,8 @@ This is a REST API application made with Express that facilitates Secret Santa b
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/votre-utilisateur/votre-projet.git
-   cd votre-projet```
+   git clone https://github.com/ClementBernard40/SecretSanta.git
+   cd SecretSanta```
 
 2. Install dependencies:
 
