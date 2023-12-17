@@ -47,16 +47,16 @@ const jwtMiddleware = require('../middlewares/jwtMiddleware');
 
 
 router
-    .route('/register')
+    .route('/register') //route to create a user
         .post(userController.userRegister)
 
 router 
-    .route("/login")
+    .route("/login") //route to log a user and get his token
         .post(userController.userLogin)
 
     
     router 
-    .route("/allUsers")
+    .route("/allUsers") //route to get the list of all users in the database
         .get(userController.listAllUsers)
 
 
@@ -64,8 +64,8 @@ router
 
 router 
     .route("/:id_users")
-        .delete(jwtMiddleware.verifyToken,userController.deleteAUser)
-        .put(jwtMiddleware.verifyToken,userController.updateAUser)
+        .delete(jwtMiddleware.verifyToken,userController.deleteAUser)//route to delete a user
+        .put(jwtMiddleware.verifyToken,userController.updateAUser)//route to update a user
 
 
 
