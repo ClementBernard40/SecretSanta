@@ -127,12 +127,9 @@ exports.getUserGroup = async (req, res) => {
 async function getAGroupById(groupId) {
     try {
         // Checking if the group exists
-        if (!group) {
-            res.status(404).send("Group not found");
-        } else {
             const group = await Group.findById(groupId);
             return group;
-        }
+
     } catch (error) {
         console.log(error);
         return null; // or handle the error appropriately
