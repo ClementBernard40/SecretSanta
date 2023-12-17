@@ -37,12 +37,9 @@ This is a REST API application made with Express that facilitates Secret Santa b
 
 
 ## Usage
-
     Start the server : 
 
-    ```bash
     npm start
-    ```
 
 
     The server will run at http://localhost:3000.
